@@ -1,4 +1,8 @@
 #include "gene_encoding.h"
+#include <stdint.h>
+
+void get_source_num_corresponding_neurons_and_offset(const Gene* gene, u_int16_t* num_neurons, u_int16_t* offset);
+void get_output_num_corresponding_neurons_and_offset(const Gene* gene, u_int16_t* num_neurons, u_int16_t* offset);
 
 // Extracts the input type from the gene
 uint8_t get_input_type(const Gene* gene) {
@@ -14,6 +18,10 @@ uint16_t get_source_neuron_id(const Gene* gene) {
     bit_source_id = bit_source_id & 0x3FF;
     uint16_t num_neurons, offset;
     get_source_num_corresponding_neurons_and_offset(gene, &num_neurons, &offset);
+    // Handle error or reserved types
+    if (num_neurons == 0xFFFF || offset == 0xFFFF) {
+        return 0xFFFF;
+    }
     uint16_t source_id = (bit_source_id % num_neurons) + offset;
     return source_id;
 }
@@ -34,6 +42,10 @@ uint16_t get_destination_neuron_id(const Gene* gene) {
     // Convert the 10 bits by taking the modulus with respect to the constant number of neurons
     uint16_t num_neurons, offset;
     get_output_num_corresponding_neurons_and_offset(gene, &num_neurons, &offset);
+    // Handle error or reserved types
+    if (num_neurons == 0xFFFF || offset == 0xFFFF) {
+        return 0xFFFF;
+    }
     uint16_t output_id = (bit_output_id % num_neurons) + offset;
     return output_id;
 }
@@ -75,8 +87,8 @@ void get_source_num_corresponding_neurons_and_offset(const Gene* gene, uint16_t*
             *offset = NUM_SENSORY_NEURONS + NUM_INTERNAL_NEURONS;
             break;
         default:
-            *num_neurons = 0;
-            *offset = 0;  // Handle error or reserved types
+            *num_neurons = 0xFFFF;
+            *offset = 0xFFFF;  // Handle error or reserved types
     }
 }
 
@@ -93,7 +105,7 @@ void get_output_num_corresponding_neurons_and_offset(const Gene* gene, uint16_t*
             *offset = NUM_SENSORY_NEURONS;
             break;
         default:
-            *num_neurons = 0;
-            *offset = 0;  // Handle error or reserved types
+            *num_neurons = 0xFFFF;
+            *offset = 0xFFFF;  // Handle error or reserved types
     }
 }
