@@ -2,6 +2,7 @@
 #define NEURON_ENCODING_H
 
 #include <stdint.h>
+#include "gene_encoding.h"
 
 
 // Neuron Types Enum
@@ -67,5 +68,13 @@ typedef struct NeuralNetwork {
     uint16_t* output_ids;         // IDs of output neurons (if you find it useful)
 } NeuralNetwork;
 
+int is_unique_id(uint16_t* unique_neurons, int* unique_count, uint16_t id);
+void initialize_neuron(Neuron* neuron, uint8_t type);
+void build_connections(Neuron* neural_network, Gene* genome, int genome_length, int neuron_count);
+Neuron* find_neuron_by_id(Neuron* neural_network, int neuron_count, uint16_t id);
+float apply_activation_function(float x, uint8_t activation_function);
+void propagate_signal_from_neuron(NeuronID id, NeuralNetwork* net);
+NeuralNetwork* initialize_neural_network(Gene* genome, int genome_length);
+void propagate_signal(NeuralNetwork* network);
 
 #endif // NEURON_ENCODING_H

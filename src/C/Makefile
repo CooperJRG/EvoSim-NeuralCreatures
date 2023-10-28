@@ -1,28 +1,30 @@
-# Compiler
+# Compiler to use
 CC = gcc
 
-# Compiler Flags
-CFLAGS = -Wall -O2
+# Compiler flags
+CFLAGS = -Wall -Wextra -g
 
 # Source files
-SRCS = main.c neuron_encoding.c gene_encoding.c
+SRC = main.c neuron_encoding.c gene_encoding.c
 
-# Object files
-OBJS = $(SRCS:.c=.o)
+# Object files (one for each source file)
+OBJ = $(SRC:.c=.o)
 
-# Executable name
-EXEC = neural_network_test
+# Name of the executable
+EXEC = neural_network
 
+# Default target
 all: $(EXEC)
 
-# Linking the executable
-$(EXEC): $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $(EXEC) -lm
+# Linking
+$(EXEC): $(OBJ)
+	$(CC) $(CFLAGS) -o $@ $^
 
-# Compiling source files into object files
-.c.o:
-	$(CC) $(CFLAGS) -c $< -o $@
+# Compilation
+%.o: %.c
+	$(CC) $(CFLAGS) -c $<
 
-# Cleaning up object files and executable
+# Phony target to clean object files and executable
+.PHONY: clean
 clean:
-	rm -f $(OBJS) $(EXEC)
+	rm -f $(OBJ) $(EXEC)

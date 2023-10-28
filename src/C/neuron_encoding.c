@@ -1,14 +1,7 @@
 #include "neuron_encoding.h"
-#include "../genes/gene_encoding.h"
+#include "gene_encoding.h"
 #include <stdlib.h>
 #include <math.h>
-
-int is_unique_id(uint16_t* unique_neurons, int* unique_count, uint16_t id);
-void initialize_neuron(Neuron* neuron, uint8_t type);
-void build_connections(Neuron* neural_network, Gene* genome, int genome_length, int neuron_count);
-Neuron* find_neuron_by_id(Neuron* neural_network, int neuron_count, uint16_t id);
-float apply_activation_function(float x, uint8_t activation_function);
-void propagate_signal_from_neuron(NeuronID id, NeuralNetwork* net);
 
 // Initialize a neural network from a genome
 NeuralNetwork* initialize_neural_network(Gene* genome, int genome_length) {
@@ -55,7 +48,6 @@ NeuralNetwork* initialize_neural_network(Gene* genome, int genome_length) {
 
         int is_source_new = is_unique_id(unique_neurons, &unique_count, source_id);
         int is_dest_new = is_unique_id(unique_neurons, &unique_count, dest_id);
-
         if (is_source_new) {
             initialize_neuron(&neurons[neuron_count], get_input_type(&genome[i]));
             if (get_input_type(&genome[i]) == SENSORY) {
@@ -66,8 +58,8 @@ NeuralNetwork* initialize_neural_network(Gene* genome, int genome_length) {
             neuron_count++;
         }
         if (is_dest_new) {
-            initialize_neuron(&neurons[neuron_count], get_input_type(&genome[i]));
-            if (get_input_type(&genome[i]) == OUTPUT) {
+            initialize_neuron(&neurons[neuron_count], get_output_type(&genome[i]));
+            if (get_output_type(&genome[i]) == OUTPUT) {
                 network->output_ids[network->num_output_neurons] = dest_id;
                 network->num_output_neurons++;
             }
@@ -141,6 +133,7 @@ int is_unique_id(uint16_t* unique_neurons, int* unique_count, uint16_t id) {
 void initialize_neuron(Neuron* neuron, uint8_t type) {
     neuron->type = type;
     neuron->data = 0;
+    neuron->connections = NULL;
     neuron->activation_threshold = 1;
     neuron->num_connections = 0;
 }

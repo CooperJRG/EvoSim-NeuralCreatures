@@ -43,5 +43,7 @@ uint8_t get_output_type(const Gene* gene);
 uint16_t get_destination_neuron_id(const Gene* gene);
 float get_weight(const Gene* gene);
 uint8_t get_activation_function(const Gene* gene);
+void get_source_num_corresponding_neurons_and_offset(const Gene* gene, u_int16_t* num_neurons, u_int16_t* offset);
+void get_output_num_corresponding_neurons_and_offset(const Gene* gene, u_int16_t* num_neurons, u_int16_t* offset);
 
 #endif // GENE_ENCODING_H
