@@ -3,6 +3,9 @@
 
 #include <stdint.h>
 
+#define NUM_NEURONS 20
+#define NUM_ACTIVATION_FUNCTIONS 3
+
 // Structure to hold gene details
 typedef struct {
     uint64_t gene;         // 64 bits for the gene
@@ -35,7 +38,7 @@ uint8_t get_input_type(const Gene* gene);
 uint16_t get_source_neuron_id(const Gene* gene);
 uint8_t get_output_type(const Gene* gene);
 uint16_t get_destination_neuron_id(const Gene* gene);
-int32_t get_weight(const Gene* gene);
+float get_weight(const Gene* gene);
 uint8_t get_activation_function(const Gene* gene);
 
 #endif // GENE_ENCODING_H
