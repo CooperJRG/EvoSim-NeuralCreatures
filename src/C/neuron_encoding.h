@@ -76,5 +76,8 @@ float apply_activation_function(float x, uint8_t activation_function);
 void propagate_signal_from_neuron(NeuronID id, NeuralNetwork* net);
 NeuralNetwork* initialize_neural_network(Gene* genome, int genome_length);
 void propagate_signal(NeuralNetwork* network);
+const char* activation_function_to_string(ActivationFunctionType type);
+const char* neuron_id_to_string(NeuronID id);
+const char* neuron_type_to_string(NeuronType type);
 
 #endif // NEURON_ENCODING_H

@@ -46,6 +46,11 @@ NeuralNetwork* initialize_neural_network(Gene* genome, int genome_length) {
         uint16_t source_id = get_source_neuron_id(&genome[i]);
         uint16_t dest_id = get_destination_neuron_id(&genome[i]);
 
+        if (source_id == 0xFFFF || dest_id == 0xFFFF) {
+            // Handle error or reserved types
+            continue;
+        }
+
         int is_source_new = is_unique_id(unique_neurons, &unique_count, source_id);
         int is_dest_new = is_unique_id(unique_neurons, &unique_count, dest_id);
         if (is_source_new) {
@@ -96,10 +101,17 @@ void build_connections(Neuron* neural_network, Gene* genome, int genome_length, 
     // Iterate through each gene in the genome
     for (int i = 0; i < genome_length; ++i) {
         uint16_t source_id = get_source_neuron_id(&genome[i]);
-        uint16_t dest_id = get_destination_neuron_id(&genome[i]);
+        uint16_t dest_id = get_destination_neuron_id(&genome[i]);\
+
+        if (source_id == 0xFFFF || dest_id == 0xFFFF) {
+            // Handle error or reserved types
+            continue;
+        }
 
         // Find the source and destination neurons
         Neuron* source_neuron = find_neuron_by_id(neural_network, neuron_count, source_id);
+
+        
 
         if (source_neuron) {  // Check if the pointers are valid
             source_neuron->num_connections++;
@@ -205,5 +217,68 @@ void propagate_signal(NeuralNetwork* network) {
     }
 }
 
+// Function to return the string name for ActivationFunctionType enum
+const char* activation_function_to_string(ActivationFunctionType type) {
+    switch(type) {
+        case RELU: return "RELU";
+        case SIGMOID: return "SIGMOID";
+        case TANH: return "TANH";
+        default: return "UNKNOWN";
+    }
+}
 
+// Function to return the string name for NeuronID enum
+const char* neuron_id_to_string(NeuronID id) {
+    switch(id) {
+        case L_n: return "L_n";
+        case L_ne: return "L_ne";
+        case L_e: return "L_e";
+        case L_se: return "L_se";
+        case L_s: return "L_s";
+        case L_sw: return "L_sw";
+        case L_w: return "L_w";
+        case L_nw: return "L_nw";
+        
+        case LW_n: return "LW_n";
+        case LW_ne: return "LW_ne";
+        case LW_e: return "LW_e";
+        case LW_se: return "LW_se";
+        case LW_s: return "LW_s";
+        case LW_sw: return "LW_sw";
+        case LW_w: return "LW_w";
+        case LW_nw: return "LW_nw";
+        
+        case I_0: return "I_0";
+        case I_1: return "I_1";
+        case I_2: return "I_2";
+        case I_3: return "I_3";
+        case I_4: return "I_4";
+        
+        case M_n: return "M_n";
+        case M_ne: return "M_ne";
+        case M_e: return "M_e";
+        case M_se: return "M_se";
+        case M_s: return "M_s";
+        case M_sw: return "M_sw";
+        case M_w: return "M_w";
+        case M_nw: return "M_nw";
+        
+        case M_r: return "M_r";
+        
+        case TOTAL_NEURONS: return "TOTAL_NEURONS";
+        
+        default: return "UNKNOWN";
+    }
+}
+
+// Function to return the string name for NeuronType enum
+const char* neuron_type_to_string(NeuronType type) {
+    switch(type) {
+        case SENSORY: return "SENSORY";
+        case INTERNAL: return "INTERNAL";
+        case CONSTANT: return "CONSTANT";
+        case OUTPUT: return "OUTPUT";
+        default: return "UNKNOWN";
+    }
+}
 // ... other utility functions as needed

@@ -1,9 +1,6 @@
 #include "gene_encoding.h"
 #include <stdint.h>
 
-void get_source_num_corresponding_neurons_and_offset(const Gene* gene, u_int16_t* num_neurons, u_int16_t* offset);
-void get_output_num_corresponding_neurons_and_offset(const Gene* gene, u_int16_t* num_neurons, u_int16_t* offset);
-
 // Extracts the input type from the gene
 uint8_t get_input_type(const Gene* gene) {
     // Use bit manipulation to extract the first 2 bits
@@ -56,7 +53,7 @@ float get_weight(const Gene* gene) {
     uint32_t int_weight = gene->gene >> 16;
     int_weight = int_weight & 0xFFFFFF;
     // Convert the integer to a float by dividing by 2^21
-    float float_weight = (float) int_weight / 2097152;
+    float float_weight = (((float) int_weight) - 8388608)/ 2097152;
     return float_weight;
 }
 
@@ -96,7 +93,7 @@ void get_source_num_corresponding_neurons_and_offset(const Gene* gene, uint16_t*
 void get_output_num_corresponding_neurons_and_offset(const Gene* gene, uint16_t* num_neurons, uint16_t* offset) {
     uint8_t output_type = get_output_type(gene);  // Changed from input_type to output_type
     switch(output_type) {
-        case 0:  // Action output
+        case 3:  // Action output
             *num_neurons = NUM_ACTION_NEURONS;
             *offset = NUM_SENSORY_NEURONS + NUM_INTERNAL_NEURONS + NUM_CONSTANT_NEURONS;
             break;
