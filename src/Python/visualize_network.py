@@ -4,8 +4,8 @@ import networkx as nx
 import numpy as np
 
 # Read CSV files
-neurons = pd.read_csv('src/Python/neurons.csv')
-connections = pd.read_csv('src/Python/connections.csv')
+neurons = pd.read_csv('/Users/coopergilkey/EvoSim-NeuralCreatures/src/C/neurons.csv')
+connections = pd.read_csv('/Users/coopergilkey/EvoSim-NeuralCreatures/src/C/connections.csv')
 
 # Initialize graph
 G = nx.DiGraph()

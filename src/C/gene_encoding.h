@@ -17,18 +17,18 @@ typedef struct {
         00 - 0: Sensory input
         01 - 1: Internal input
         10 - 2: Constant input
-        11 - 3: Reserved for future use
+        11 - 3: Action input (invalid)
     Next 10 bits is for the source neuron ID
         Takes values from 0 to 1023 % num_corresponding_neurons
     Next 2 bits is for the output type
-        00 - 0: Action output
+        00 - 0: Sensory output (invalid)
         01 - 1: Internal output
-        10 - 2: Reserved for future use
-        11 - 3: Reserved for future use
+        10 - 2: Constant output (invalid)
+        11 - 3: Action output
     Next 10 bits is for the destination neuron ID
         Takes values from 0 to 1023 % num_corresponding_neurons
     Next 24 bits is for the weight, signed
-        Takes values from -8388608 to 8388607 / 2097151
+        Takes values from -8388608 to 8388607 / 2097152
         Roughly -4 to 4
     Next 8 bits is for the activation function
         Takes values from 0 to 255 % num_activation_functions

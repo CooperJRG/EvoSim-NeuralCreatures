@@ -2,6 +2,7 @@
 #define NEURON_ENCODING_H
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "gene_encoding.h"
 
 
@@ -73,7 +74,7 @@ void initialize_neuron(Neuron* neuron, uint8_t type);
 void build_connections(Neuron* neural_network, Gene* genome, int genome_length, int neuron_count);
 Neuron* find_neuron_by_id(Neuron* neural_network, int neuron_count, uint16_t id);
 float apply_activation_function(float x, uint8_t activation_function);
-void propagate_signal_from_neuron(NeuronID id, NeuralNetwork* net);
+void propagate_signal_from_neuron(NeuronID id, NeuralNetwork* net, bool* visited);
 NeuralNetwork* initialize_neural_network(Gene* genome, int genome_length);
 void propagate_signal(NeuralNetwork* network);
 const char* activation_function_to_string(ActivationFunctionType type);

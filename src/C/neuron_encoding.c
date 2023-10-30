@@ -1,6 +1,9 @@
 #include "neuron_encoding.h"
 #include "gene_encoding.h"
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
 #include <math.h>
 
 // Initialize a neural network from a genome
@@ -146,7 +149,7 @@ void initialize_neuron(Neuron* neuron, uint8_t type) {
     neuron->type = type;
     neuron->data = 0;
     neuron->connections = NULL;
-    neuron->activation_threshold = 1;
+    neuron->activation_threshold = 0;
     neuron->num_connections = 0;
 }
 
@@ -188,13 +191,16 @@ float apply_activation_function(float x, uint8_t activation_function) {
 }
 
 // Updated recursive function to propagate signal from a given neuron
-void propagate_signal_from_neuron(NeuronID id, NeuralNetwork* net) {
+void propagate_signal_from_neuron(NeuronID id, NeuralNetwork* net, bool* visited) {
     // Find the neuron
     Neuron* neuron = find_neuron_by_id(net->neurons, net->total_neurons, id);
-    // Base case: if the neuron has no outgoing connections, return
-    if (neuron->num_connections == 0) {
+    // Base case: if the neuron has no outgoing connections or is already visited, return
+    if (neuron->num_connections == 0 || visited[id]) {
         return;
     }
+
+    // Mark the current neuron as visited
+    visited[id] = true;
 
     // Propagate signal through all connections
     for (int i = 0; i < neuron->num_connections; ++i) {
@@ -205,17 +211,25 @@ void propagate_signal_from_neuron(NeuronID id, NeuralNetwork* net) {
         find_neuron_by_id(net->neurons, net->total_neurons, neuron->connections[i].id)->data += neuron->connections[i].weight * activated_output;
 
         // Recursively propagate signal from the connected neuron
-        propagate_signal_from_neuron(neuron->connections[i].id, net);
+        propagate_signal_from_neuron(neuron->connections[i].id, net, visited);
     }
-}
 
+    // Unmark the current neuron as visited for future calls
+    visited[id] = false;
+
+}
 
 // Main function to initiate signal propagation from sensory neurons
 void propagate_signal(NeuralNetwork* network) {
+    // Create a visited array
+    bool visited[network->total_neurons];
+    memset(visited, 0, sizeof(visited));
+
     for (int i = 0; i < network->num_sensory_neurons; ++i) {
-        propagate_signal_from_neuron(network->sensory_ids[i], network);
+        propagate_signal_from_neuron(network->sensory_ids[i], network, visited);
     }
 }
+
 
 // Function to return the string name for ActivationFunctionType enum
 const char* activation_function_to_string(ActivationFunctionType type) {
