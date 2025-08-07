@@ -15,7 +15,7 @@ OBJS = $(SRCS:.c=.o)
 
 # Rule to link object files to create target executable
 $(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS)
+	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS) -lm
 
 # Rule to compile source files to object files
 .c.o:
