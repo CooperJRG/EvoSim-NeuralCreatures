@@ -194,13 +194,17 @@ float apply_activation_function(float x, uint8_t activation_function) {
 void propagate_signal_from_neuron(NeuronID id, NeuralNetwork* net, bool* visited) {
     // Find the neuron
     Neuron* neuron = find_neuron_by_id(net->neurons, net->total_neurons, id);
+    if (!neuron) {
+        return;
+    }
+    int neuron_index = (int)(neuron - net->neurons);
     // Base case: if the neuron has no outgoing connections or is already visited, return
-    if (neuron->num_connections == 0 || visited[id]) {
+    if (neuron->num_connections == 0 || visited[neuron_index]) {
         return;
     }
 
     // Mark the current neuron as visited
-    visited[id] = true;
+    visited[neuron_index] = true;
 
     // Propagate signal through all connections
     for (int i = 0; i < neuron->num_connections; ++i) {
@@ -208,14 +212,16 @@ void propagate_signal_from_neuron(NeuronID id, NeuralNetwork* net, bool* visited
         float activated_output = apply_activation_function(neuron->data, neuron->connections[i].activation_function);
 
         // Update the connected neuron's data
-        find_neuron_by_id(net->neurons, net->total_neurons, neuron->connections[i].id)->data += neuron->connections[i].weight * activated_output;
-
-        // Recursively propagate signal from the connected neuron
-        propagate_signal_from_neuron(neuron->connections[i].id, net, visited);
+        Neuron* target = find_neuron_by_id(net->neurons, net->total_neurons, neuron->connections[i].id);
+        if (target) {
+            target->data += neuron->connections[i].weight * activated_output;
+            // Recursively propagate signal from the connected neuron
+            propagate_signal_from_neuron(neuron->connections[i].id, net, visited);
+        }
     }
 
     // Unmark the current neuron as visited for future calls
-    visited[id] = false;
+    visited[neuron_index] = false;
 
 }
 
