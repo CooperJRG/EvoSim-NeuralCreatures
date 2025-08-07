@@ -45,32 +45,37 @@ int main() {
         update_grid(grid, creatures);
         if ( step != 0 && (step)% 300 == 0) {
             printf("Gen %d:\n", gen);
-            printf("Survival Rate: %0.2f%%\n", ((float)grid->num_creatures_alive_last_gen / max_creatures) * 100);
-            gen++;
-            // Pick a random creature, show its genome
-            int creature_index = rand() % grid->num_creatures_alive_last_gen;
-            FILE *neuron_file = fopen("neurons.csv", "w");
-            fprintf(neuron_file, "Index,Type,ID,Label\n");
+            if (grid->num_creatures_alive_last_gen > 0) {
+                printf("Survival Rate: %0.2f%%\n", ((float)grid->num_creatures_alive_last_gen / max_creatures) * 100);
+                // Pick a random creature, show its genome
+                int creature_index = rand() % grid->num_creatures_alive_last_gen;
+                if (creatures[creature_index].brain) {
+                    FILE *neuron_file = fopen("neurons.csv", "w");
+                    fprintf(neuron_file, "Index,Type,ID,Label\n");
 
-            for (int i = 0; i < creatures[creature_index].brain->total_neurons; ++i) {
-                Neuron* neuron = &creatures[creature_index].brain->neurons[i];
-                fprintf(neuron_file, "%d,%s,%u,%s\n", i, neuron_type_to_string(neuron->type), neuron->id, neuron_id_to_string(neuron->id));
-            }
+                    for (int i = 0; i < creatures[creature_index].brain->total_neurons; ++i) {
+                        Neuron* neuron = &creatures[creature_index].brain->neurons[i];
+                        fprintf(neuron_file, "%d,%s,%u,%s\n", i, neuron_type_to_string(neuron->type), neuron->id, neuron_id_to_string(neuron->id));
+                    }
 
-            fclose(neuron_file);
+                    fclose(neuron_file);
 
-            FILE *connection_file = fopen("connections.csv", "w");
-            fprintf(connection_file, "SourceID,TargetID,Weight,ActivationFunction\n");
+                    FILE *connection_file = fopen("connections.csv", "w");
+                    fprintf(connection_file, "SourceID,TargetID,Weight,ActivationFunction\n");
 
-            for (int i = 0; i < creatures[creature_index].brain->total_neurons; ++i) {
-                Neuron* neuron = &creatures[creature_index].brain->neurons[i];
-                for (int j = 0; j < neuron->num_connections; ++j) {
-                    fprintf(connection_file, "%u,%u,%f,%s\n", neuron->id, neuron->connections[j].id, neuron->connections[j].weight, activation_function_to_string(neuron->connections[j].activation_function));
+                    for (int i = 0; i < creatures[creature_index].brain->total_neurons; ++i) {
+                        Neuron* neuron = &creatures[creature_index].brain->neurons[i];
+                        for (int j = 0; j < neuron->num_connections; ++j) {
+                            fprintf(connection_file, "%u,%u,%f,%s\n", neuron->id, neuron->connections[j].id, neuron->connections[j].weight, activation_function_to_string(neuron->connections[j].activation_function));
+                        }
+                    }
+
+                    fclose(connection_file);
                 }
+            } else {
+                printf("Survival Rate: 0.00%%\n");
             }
-
-            fclose(connection_file);
-
+            gen++;
         }
     }
 

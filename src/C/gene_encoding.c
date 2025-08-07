@@ -16,7 +16,7 @@ uint16_t get_source_neuron_id(const Gene* gene) {
     uint16_t num_neurons, offset;
     get_source_num_corresponding_neurons_and_offset(gene, &num_neurons, &offset);
     // Handle error or reserved types
-    if (num_neurons == 0xFFFF || offset == 0xFFFF) {
+    if (num_neurons == 0 || num_neurons == 0xFFFF || offset == 0xFFFF) {
         return 0xFFFF;
     }
     uint16_t source_id = (bit_source_id % num_neurons) + offset;
@@ -40,7 +40,7 @@ uint16_t get_destination_neuron_id(const Gene* gene) {
     uint16_t num_neurons, offset;
     get_output_num_corresponding_neurons_and_offset(gene, &num_neurons, &offset);
     // Handle error or reserved types
-    if (num_neurons == 0xFFFF || offset == 0xFFFF) {
+    if (num_neurons == 0 || num_neurons == 0xFFFF || offset == 0xFFFF) {
         return 0xFFFF;
     }
     uint16_t output_id = (bit_output_id % num_neurons) + offset;

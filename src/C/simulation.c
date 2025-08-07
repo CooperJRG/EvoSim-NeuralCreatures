@@ -58,6 +58,10 @@ void spawn_creature(Creature* creature, int genome_length) {
         creature->genome[i].gene = ((uint64_t)random1 << 32) | random2;
     }
     creature->brain = initialize_neural_network(creature->genome, genome_length);
+    if (!creature->brain) {
+        creature->energy = 0;
+        return;
+    }
     creature->position.x = 0;
     creature->position.y = 0;
     creature->age = 0;
@@ -151,10 +155,16 @@ void mate_creatures(Grid* grid, Creature* creatures) {
         // Mutation
         mutate(offspring_genome, genome_length);
 
+        NeuralNetwork* brain = initialize_neural_network(offspring_genome, genome_length);
+        if (!brain) {
+            free(offspring_genome);
+            continue;
+        }
+
         // Assign the offspring genome to a new creature
         new_creatures[new_creature_count].genome = offspring_genome;
         new_creatures[new_creature_count].genome_length = genome_length;
-        new_creatures[new_creature_count].brain = initialize_neural_network(offspring_genome, genome_length);
+        new_creatures[new_creature_count].brain = brain;
         new_creatures[new_creature_count].energy = 100;
         new_creatures[new_creature_count].age = 0;
 
@@ -204,6 +214,12 @@ void mate_creatures(Grid* grid, Creature* creatures) {
 void update_creature(Grid* grid, Creature creature){
     // Fetch the cell the creature is currently in
     Cell* cell = get_cell(grid, creature.position.x, creature.position.y);
+    if (!creature.brain) {
+        cell->flags.occupied = 0;
+        cell->creature_id = 0;
+        grid->num_creatures--;
+        return;
+    }
     // Check if the creature is dead
     if (creature.energy <= 0) {
         cell->flags.occupied = 0;

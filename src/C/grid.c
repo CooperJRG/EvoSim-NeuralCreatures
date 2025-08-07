@@ -22,6 +22,7 @@ Grid* initialize_grid(uint16_t width, uint16_t height, uint32_t max_creatures, u
     grid->max_steps = max_steps;
     grid->num_generations = 0;
     grid->num_genomes = num_genomes;
+    grid->num_creatures_alive_last_gen = 0;
     grid->cells = malloc(width * height * sizeof(Cell));
     if (!grid->cells) {
         free(grid);
