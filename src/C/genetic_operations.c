@@ -2,27 +2,41 @@
 #include <stdlib.h>
 #include <time.h>
 
-
 // Two-point Crossover
-void two_point_crossover(Gene* parent1, Gene* parent2, Gene* offspring1, Gene* offspring2, int genome_length) {
-    // Will treat each gene as a bit string for simplicity
-    // Generate two random crossover points
-     int i = rand() % genome_length;
-        int crossover1 = rand() % 64;
-        int crossover2 = rand() % 64;
-        if (crossover1 > crossover2) {
-            int temp = crossover1;
-            crossover1 = crossover2;
-            crossover2 = temp;
+// Performs crossover on the genome treating each gene as an indivisible unit.
+// Genes outside the crossover window are copied from their respective parents
+// while genes inside the window are swapped. If offspring2 is NULL the caller
+// only expects one child.
+void two_point_crossover(Gene* parent1, Gene* parent2, Gene* offspring1,
+                         Gene* offspring2, int genome_length) {
+    if (!parent1 || !parent2 || !offspring1 || genome_length <= 0) {
+        return;
+    }
+
+    // Choose two crossover points along the genome
+    int crossover1 = rand() % genome_length;
+    int crossover2 = rand() % genome_length;
+    if (crossover1 > crossover2) {
+        int tmp = crossover1;
+        crossover1 = crossover2;
+        crossover2 = tmp;
+    }
+
+    for (int i = 0; i < genome_length; ++i) {
+        if (i < crossover1 || i >= crossover2) {
+            // Outside crossover region: copy from original parent
+            offspring1[i] = parent1[i];
+            if (offspring2) {
+                offspring2[i] = parent2[i];
+            }
+        } else {
+            // Inside crossover region: swap parental contribution
+            offspring1[i] = parent2[i];
+            if (offspring2) {
+                offspring2[i] = parent1[i];
+            }
         }
-        // Take all of the genes before the first crossover point from parent1
-        uint64_t mask1 = ((1ULL << (crossover1)) - 1) << (64 - crossover1);
-        // Take all of the genes between the two crossover points from parent2
-        uint64_t mask2 = ((1ULL << (crossover2 - crossover1)) - 1) << (64 - crossover2);
-        // Take all of the genes after the second crossover point from parent1
-        uint64_t mask3 = ~(mask1 | mask2);
-        offspring1[i].gene = (parent1[i].gene & mask1) | (parent2[i].gene & mask2) | (parent1[i].gene & mask3);
-    
+    }
 }
 
 // Mutation
