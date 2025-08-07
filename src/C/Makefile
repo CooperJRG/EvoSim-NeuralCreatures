@@ -1,11 +1,22 @@
+## Cross-platform Makefile
+
 # Compiler to use
 CC = gcc
 
 # Flags to pass to the compiler
 CFLAGS = -Wall -O2 -g
 
+# Detect Windows vs Unix-like systems
+ifeq ($(OS),Windows_NT)
+    EXT = .exe
+    RM = del /f
+else
+    EXT =
+    RM = rm -f
+endif
+
 # Target executable name
-TARGET = simulation
+TARGET = simulation$(EXT)
 
 # Source files
 SRCS = main.c grid.c neuron_encoding.c genetic_operations.c simulation.c gene_encoding.c
@@ -23,4 +34,4 @@ $(TARGET): $(OBJS)
 
 # Rule for cleaning up object files and target executable
 clean:
-	rm -f $(OBJS) $(TARGET)
+	$(RM) $(OBJS) $(TARGET)
