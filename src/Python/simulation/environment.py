@@ -2,6 +2,7 @@ import argparse
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import numpy as np
 import pandas as pd
 
@@ -53,11 +54,76 @@ class Grid:
         return img
 
     def plot(self) -> None:
-        """Display the grid using matplotlib."""
+        """Display the grid with friendly icons and a legend.
+
+        Cells are annotated with simple emojis or text so that the scene is easy
+        to understand at a glance.  Grid lines and a legend are added to help a
+        younger audience interpret the environment.
+        """
         img = self._to_image()
-        plt.imshow(img, interpolation="none")
-        plt.axis("off")
+        fig, ax = plt.subplots()
+        ax.imshow(img, interpolation="none")
+
+        # Draw grid lines so each cell is distinct
+        ax.set_xticks(np.arange(-0.5, self.width, 1), minor=True)
+        ax.set_yticks(np.arange(-0.5, self.height, 1), minor=True)
+        ax.grid(which="minor", color="gray", linestyle="-", linewidth=0.5)
+        ax.tick_params(
+            which="both", bottom=False, left=False, labelbottom=False, labelleft=False
+        )
+
+        # Add icons or text to explain what is in each cell
+        for _, row in self.dataframe.iterrows():
+            x = int(row["X"])
+            y = int(row["Y"])
+            label = ""
+            if row["Wall"]:
+                label = "Wall"
+            elif row["Poison"]:
+                label = "☠"
+            elif row["Food"]:
+                label = "🍎"
+            elif row["Water"]:
+                label = "💧"
+            elif row["Sunlit"]:
+                label = "☀"
+            if row["Occupied"]:
+                label = f"{int(row['CreatureID'])}"
+            if label:
+                ax.text(x, y, label, ha="center", va="center", fontsize=8)
+
+        legend_patches = [
+            mpatches.Patch(color="red", label="Creature"),
+            mpatches.Patch(color="green", label="Food"),
+            mpatches.Patch(color="magenta", label="Poison"),
+            mpatches.Patch(color="blue", label="Water"),
+            mpatches.Patch(color="yellow", label="Sunlit"),
+            mpatches.Patch(color="black", label="Wall"),
+        ]
+        ax.legend(handles=legend_patches, bbox_to_anchor=(1.05, 1), loc="upper left")
         plt.show()
+
+    def describe_creatures(self) -> None:
+        """Print a friendly sentence describing each creature's situation."""
+        creatures = self.dataframe[self.dataframe["Occupied"]]
+        for _, row in creatures.iterrows():
+            x, y = int(row["X"]), int(row["Y"])
+            parts = []
+            if row["Food"]:
+                parts.append("eating food")
+            if row["Poison"]:
+                parts.append("standing on poison")
+            if row["Water"]:
+                parts.append("in water")
+            if row["Sunlit"]:
+                parts.append("in the sun")
+            if row["Wall"]:
+                parts.append("up against a wall")
+            if not parts:
+                parts.append("on empty ground")
+            print(
+                f"Creature {int(row['CreatureID'])} at ({x}, {y}) is {' and '.join(parts)}."
+            )
 
 
 def main() -> None:
@@ -73,6 +139,7 @@ def main() -> None:
 
     grid = Grid.from_csv(args.grid_csv)
     grid.plot()
+    grid.describe_creatures()
 
 
 if __name__ == "__main__":
