@@ -40,7 +40,7 @@ void spawn_creatures(Grid* grid, Creature* creatures);
  * @param grid Pointer to the grid containing the creature.
  * @param creature The creature to update.
  */
-void update_creature(Grid* grid, Creature creature);
+void update_creature(Grid* grid, Creature* creature);
 void spawn_creature(Creature* creature, int genome_length);
 /**
  * @brief Mates the creatures in the given grid.

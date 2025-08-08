@@ -40,6 +40,8 @@ void spawn_creatures(Grid* grid, Creature* creatures){
         creatures[i].energy = 100;
         creatures[i].id = i + 1;
     }
+    // scatter initial food across the grid
+    scatter_food(grid, grid->max_creatures);
 }
 
 void spawn_creature(Creature* creature, int genome_length) {
@@ -92,7 +94,7 @@ void update_grid(Grid* grid, Creature* creatures){
                 // Fetch the creature in the cell
                 Creature* creature = &creatures[grid->cells[i].creature_id - 1];
                 // Update the creature's state
-                update_creature(grid, *creature);
+                update_creature(grid, creature);
             }
         }
     }
@@ -203,6 +205,8 @@ void mate_creatures(Grid* grid, Creature* creatures) {
         get_cell(grid, x, y)->creature_id = i + 1;
     }
     grid->num_creatures = grid->max_creatures;
+    // replenish food for new generation
+    scatter_food(grid, grid->max_creatures);
 }
 
 /**
@@ -211,34 +215,39 @@ void mate_creatures(Grid* grid, Creature* creatures) {
  * @param grid Pointer to the grid containing the creature.
  * @param creature The creature to update.
  */
-void update_creature(Grid* grid, Creature creature){
+void update_creature(Grid* grid, Creature* creature){
     // Fetch the cell the creature is currently in
-    Cell* cell = get_cell(grid, creature.position.x, creature.position.y);
-    if (!creature.brain) {
+    Cell* cell = get_cell(grid, creature->position.x, creature->position.y);
+    if (!creature->brain) {
         cell->flags.occupied = 0;
         cell->creature_id = 0;
         grid->num_creatures--;
         return;
     }
     // Check if the creature is dead
-    if (creature.energy <= 0) {
+    if (creature->energy <= 0) {
         cell->flags.occupied = 0;
         cell->creature_id = 0;
         grid->num_creatures--;
         return;
     }
+    // Gain energy if standing on food
+    if (cell->flags.food) {
+        creature->energy += 25;
+        cell->flags.food = 0;
+    }
     // Update the creature's age
-    creature.age++;
+    creature->age++;
     // Update the creature's energy
-    creature.energy -= 0.01;
+    creature->energy -= 0.01f;
     // Fetch the creature's brain
-    NeuralNetwork* brain = creature.brain;
+    NeuralNetwork* brain = creature->brain;
     // Fetch the creature's sensory neurons
     uint16_t* sensory_ids = brain->sensory_ids;
     // Iterate through each sensory neuron
     for (int i = 0; i < brain->num_sensory_neurons; ++i) {
         // Fetch the data for the sensory neuron
-        float data = get_sensory_data(sensory_ids[i], creature.position.x, creature.position.y, grid);
+        float data = get_sensory_data(sensory_ids[i], creature->position.x, creature->position.y, grid);
         // Fetch the sensory neuron
         Neuron* neuron = find_neuron_by_id(brain->neurons, brain->total_neurons, sensory_ids[i]);
         // Update the sensory neuron's data
@@ -263,7 +272,7 @@ void update_creature(Grid* grid, Creature creature){
     }
     // If the data is above the activation threshold, perform the action
     if (action_id >15 && data > find_neuron_by_id(brain->neurons, brain->total_neurons, action_id)->activation_threshold) {
-        perform_action(action_id, grid, &creature);
+        perform_action(action_id, grid, creature);
     }
 }
 
@@ -283,6 +292,7 @@ void perform_action(uint16_t action_id, Grid* grid, Creature* creature) {
                     get_cell(grid, creature->position.x, creature->position.y)->flags.occupied = 0;
                     get_cell(grid, creature->position.x, creature->position.y)->creature_id = 0;
                     creature->position.y--;
+                    if (cell->flags.food) { creature->energy += 25; cell->flags.food = 0; }
                 }
             }
             break;
@@ -296,6 +306,7 @@ void perform_action(uint16_t action_id, Grid* grid, Creature* creature) {
                     get_cell(grid, creature->position.x, creature->position.y)->creature_id = 0;
                     creature->position.x++;
                     creature->position.y--;
+                    if (cell->flags.food) { creature->energy += 25; cell->flags.food = 0; }
                 }
             }
             break;
@@ -308,6 +319,7 @@ void perform_action(uint16_t action_id, Grid* grid, Creature* creature) {
                     get_cell(grid, creature->position.x, creature->position.y)->flags.occupied = 0;
                     get_cell(grid, creature->position.x, creature->position.y)->creature_id = 0;
                     creature->position.x++;
+                    if (cell->flags.food) { creature->energy += 25; cell->flags.food = 0; }
                 }
             }
             break;
@@ -321,6 +333,7 @@ void perform_action(uint16_t action_id, Grid* grid, Creature* creature) {
                     get_cell(grid, creature->position.x, creature->position.y)->creature_id = 0;
                     creature->position.x++;
                     creature->position.y++;
+                    if (cell->flags.food) { creature->energy += 25; cell->flags.food = 0; }
                 }
             }
             break;
@@ -333,6 +346,7 @@ void perform_action(uint16_t action_id, Grid* grid, Creature* creature) {
                     get_cell(grid, creature->position.x, creature->position.y)->flags.occupied = 0;
                     get_cell(grid, creature->position.x, creature->position.y)->creature_id = 0;
                     creature->position.y++;
+                    if (cell->flags.food) { creature->energy += 25; cell->flags.food = 0; }
                 }
             }
             break;
@@ -346,6 +360,7 @@ void perform_action(uint16_t action_id, Grid* grid, Creature* creature) {
                     get_cell(grid, creature->position.x, creature->position.y)->creature_id = 0;
                     creature->position.x--;
                     creature->position.y++;
+                    if (cell->flags.food) { creature->energy += 25; cell->flags.food = 0; }
                 }
             }
             break;
@@ -358,6 +373,7 @@ void perform_action(uint16_t action_id, Grid* grid, Creature* creature) {
                     get_cell(grid, creature->position.x, creature->position.y)->flags.occupied = 0;
                     get_cell(grid, creature->position.x, creature->position.y)->creature_id = 0;
                     creature->position.x--;
+                    if (cell->flags.food) { creature->energy += 25; cell->flags.food = 0; }
                 }
             }
             break;
@@ -371,6 +387,7 @@ void perform_action(uint16_t action_id, Grid* grid, Creature* creature) {
                     get_cell(grid, creature->position.x, creature->position.y)->creature_id = 0;
                     creature->position.x--;
                     creature->position.y--;
+                    if (cell->flags.food) { creature->energy += 25; cell->flags.food = 0; }
                 }
             }
             break;
@@ -386,7 +403,13 @@ float get_sensory_data(NeuronID id, uint16_t x, uint16_t y, Grid* grid) {
             dy = y - 1;
             if (dy >= 0) {
                 cell = get_cell(grid, x, dy);
-                data = cell->flags.occupied ? -1.0 : 0.0;
+                if (cell->flags.occupied) {
+                    data = -1.0;
+                } else if (cell->flags.food) {
+                    data = 1.0;
+                } else {
+                    data = 0.0;
+                }
             } else {
                 data = -2.0;  // Out of bounds
             }
@@ -396,7 +419,13 @@ float get_sensory_data(NeuronID id, uint16_t x, uint16_t y, Grid* grid) {
             dy = y - 1;
             if (dx < grid->width && dy >= 0) {
                 cell = get_cell(grid, dx, dy);
-                data = cell->flags.occupied ? -1.0 : 0.0;
+                if (cell->flags.occupied) {
+                    data = -1.0;
+                } else if (cell->flags.food) {
+                    data = 1.0;
+                } else {
+                    data = 0.0;
+                }
             } else {
                 data = -2.0;  // Out of bounds
             }
@@ -405,7 +434,13 @@ float get_sensory_data(NeuronID id, uint16_t x, uint16_t y, Grid* grid) {
             dx = x + 1;
             if (dx < grid->width) {
                 cell = get_cell(grid, dx, y);
-                data = cell->flags.occupied ? -1.0 : 0.0;
+                if (cell->flags.occupied) {
+                    data = -1.0;
+                } else if (cell->flags.food) {
+                    data = 1.0;
+                } else {
+                    data = 0.0;
+                }
             } else {
                 data = -2.0;  // Out of bounds
             }
@@ -415,7 +450,13 @@ float get_sensory_data(NeuronID id, uint16_t x, uint16_t y, Grid* grid) {
             dy = y + 1;
             if (dx < grid->width && dy < grid->height) {
                 cell = get_cell(grid, dx, dy);
-                data = cell->flags.occupied ? -1.0 : 0.0;
+                if (cell->flags.occupied) {
+                    data = -1.0;
+                } else if (cell->flags.food) {
+                    data = 1.0;
+                } else {
+                    data = 0.0;
+                }
             } else {
                 data = -2.0;  // Out of bounds
             }
@@ -424,7 +465,13 @@ float get_sensory_data(NeuronID id, uint16_t x, uint16_t y, Grid* grid) {
             dy = y + 1;
             if (dy < grid->height) {
                 cell = get_cell(grid, x, dy);
-                data = cell->flags.occupied ? -1.0 : 0.0;
+                if (cell->flags.occupied) {
+                    data = -1.0;
+                } else if (cell->flags.food) {
+                    data = 1.0;
+                } else {
+                    data = 0.0;
+                }
             } else {
                 data = -2.0;  // Out of bounds
             }
@@ -434,7 +481,13 @@ float get_sensory_data(NeuronID id, uint16_t x, uint16_t y, Grid* grid) {
             dy = y + 1;
             if (dx >= 0 && dy < grid->height) {
                 cell = get_cell(grid, dx, dy);
-                data = cell->flags.occupied ? -1.0 : 0.0;
+                if (cell->flags.occupied) {
+                    data = -1.0;
+                } else if (cell->flags.food) {
+                    data = 1.0;
+                } else {
+                    data = 0.0;
+                }
             } else {
                 data = -2.0;  // Out of bounds
             }
@@ -443,7 +496,13 @@ float get_sensory_data(NeuronID id, uint16_t x, uint16_t y, Grid* grid) {
             dx = x - 1;
             if (dx >= 0) {
                 cell = get_cell(grid, dx, y);
-                data = cell->flags.occupied ? -1.0 : 0.0;
+                if (cell->flags.occupied) {
+                    data = -1.0;
+                } else if (cell->flags.food) {
+                    data = 1.0;
+                } else {
+                    data = 0.0;
+                }
             } else {
                 data = -2.0;  // Out of bounds
             }
@@ -453,7 +512,13 @@ float get_sensory_data(NeuronID id, uint16_t x, uint16_t y, Grid* grid) {
             dy = y - 1;
             if (dx >= 0 && dy >= 0) {
                 cell = get_cell(grid, dx, dy);
-                data = cell->flags.occupied ? -1.0 : 0.0;
+                if (cell->flags.occupied) {
+                    data = -1.0;
+                } else if (cell->flags.food) {
+                    data = 1.0;
+                } else {
+                    data = 0.0;
+                }
             } else {
                 data = -2.0;  // Out of bounds
             }
