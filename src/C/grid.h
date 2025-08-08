@@ -71,4 +71,12 @@ int output_grid_to_csv(Grid* grid, const char* filename);
 
 // ... Add any other utility functions or operations that should be supported by the grid.
 
+/**
+ * Scatter a number of food items randomly across the grid.
+ *
+ * @param grid Pointer to the grid.
+ * @param amount Number of food cells to place.
+ */
+void scatter_food(Grid* grid, uint32_t amount);
+
 #endif // GRID_H

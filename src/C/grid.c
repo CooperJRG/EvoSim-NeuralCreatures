@@ -86,3 +86,20 @@ int output_grid_to_csv(Grid* grid, const char* filename){
     fclose(file);
     return 0;
 }
+
+/**
+ * Scatter a number of food items randomly across the grid. Food is only placed
+ * in empty cells so it doesn't overwrite creatures or other items.
+ */
+void scatter_food(Grid* grid, uint32_t amount) {
+    uint32_t placed = 0;
+    while (placed < amount) {
+        uint16_t x = rand() % grid->width;
+        uint16_t y = rand() % grid->height;
+        Cell* cell = get_cell(grid, x, y);
+        if (!cell->flags.occupied && !cell->flags.food && !cell->flags.wall) {
+            cell->flags.food = 1;
+            placed++;
+        }
+    }
+}
