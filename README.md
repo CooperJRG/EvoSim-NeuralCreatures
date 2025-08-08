@@ -8,3 +8,14 @@ the C simulation.  The viewer now draws simple emojis, grid lines and a legend
 so it's clear where food, poison, water and creatures are located.  After the
 image is shown a short sentence is printed describing what each creature is
 doing.
+
+## Screensaver
+
+After generating a set of grid CSV snapshots for one generation, run
+
+```
+python src/Python/simulation/screensaver.py path/to/snapshots
+```
+
+The script loops through the frames endlessly so you can watch the creatures
+interact like a screen saver.
